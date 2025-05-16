@@ -1,0 +1,100 @@
+version: '3.8'
+
+networks:
+  microservices-network:
+    external: true  # Use the existing network
+    name: microservices-architecture_microservices-network
+
+services:
+  user-service:
+    image: user-service:latest
+    container_name: user-service
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/user-service
+      - JWT_SECRET=AJHSI9U8S7DYSD8S6H7S5DSD6S67DS78D
+    networks:
+      - microservices-network
+
+  task-service:
+    image: task-service:latest
+    container_name: task-service
+    build:
+      context: ./task-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/task-service
+      - JWT_SECRET=AJHSI9U8S7DYSD8S6H7S5DSD6S67DS78D
+    networks:
+      - microservices-network
+    
+  assignment-service:
+    image: assignment-service:latest
+    container_name: assignment-service
+    build:
+      context: ./assignment-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/assignment-service
+      - JWT_SECRET=AJHSI9U8S7DYSD8S6H7S5DSD6S67DS78D
+    networks:
+      - microservices-network
+
+  notification-service:
+    image: notification-service:latest
+    container_name: notification-service
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/assignment-service
+      - JWT_SECRET=AJHSI9U8S7DYSD8S6H7S5DSD6S67DS78D
+    networks:
+      - microservices-network
+
+  dashboard-service:
+    image: dashboard-service:latest
+    container_name: dashboard-service
+    build:
+      context: ./dashboard-service
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/assignment-service
+      - JWT_SECRET=AJHSI9U8S7DYSD8S6H7S5DSD6S67DS78D
+    networks:
+      - microservices-network  
+
+  api-gateway:
+    image: api-gateway:latest
+    container_name: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - USERS_URL=http://user-service:3001
+      - TASKS_URL=http://task-service:3002
+      - ASSIGNMENT_URL=http://assignment-service:3003
+      - NOTIFICATION_URL=http://notification-service:3004
+      - DASHBOARD_URL=http://dashboard-service:3005
+    depends_on:
+      - user-service
+      - task-service
+      - assignment-service
+      - notification-service
+      - dashboard-service
+    networks:
+      - microservices-network
